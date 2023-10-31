@@ -1,0 +1,21 @@
+﻿@{
+  Layout = null;
+  var name =  "You";
+}
+<html>
+
+<head>
+  <title>Hello React</title>
+
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+  <script src="~/scripts/react.development.js"></script>
+  <script src="~/scripts/react-dom.development.js"></script>
+  <script src="~/scripts/react-ssr.js" asp-append-version="true"></script>
+</head>
+
+<body>
+  @Html.React("ReactSsr.Hello", new { name })
+  @Html.ReactInitJavaScript()
+</body>
+
+</html>
