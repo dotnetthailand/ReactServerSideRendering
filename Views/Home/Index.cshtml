@@ -1,6 +1,6 @@
 ﻿@{
   Layout = null;
-  var name =  "You";
+  var name = "You";
 }
 <html>
 
@@ -15,7 +15,8 @@
 
 <body>
   @Html.React("ReactSsr.Hello", new { name })
-  @Html.React("ReactSsr.SortableList", new {  })
+  @* @Html.React("ReactSsr.SortableList", new { }) *@
+  @Html.React("ReactSsr.SortableListKit", new { })
   @Html.ReactInitJavaScript()
 </body>
 

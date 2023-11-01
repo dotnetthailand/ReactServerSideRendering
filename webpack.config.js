@@ -76,7 +76,10 @@ module.exports = {
       filename: "[name].css",
     }),
   ],
-  externals: [{ react: 'React' }],
+  externals: [{
+    react: 'React',
+    'react-dom': 'ReactDOM'
+  }],
   // https://webpack.js.org/configuration/devtool/
   devtool: 'inline-source-map',
 };
