@@ -2,6 +2,13 @@
 
 The example project for minimal setup of ReactJS.NET project, React server-side rendering with ASP.NET Core MVC, Linux
 
+
+# Required packages 
+- JavaScriptEngineSwitcher.V8
+- JavaScriptEngineSwitcher.V8.Native.linux-x64
+- JavaScriptEngineSwitcher.Extensions.MsDependencyInjection
+- React.AspNet
+
 ## How to run the project locally
 - Execute command in your Linux terminal
 ```sh
