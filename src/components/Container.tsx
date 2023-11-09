@@ -2,6 +2,7 @@ import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import {
   SortableContext,
+  useSortable,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 
@@ -16,10 +17,15 @@ const containerStyle = {
 
 export default function Container(props) {
   const { id, items } = props;
+  const { setNodeRef } = useDroppable({ id });
 
-  const { setNodeRef } = useDroppable({
-    id
-  });
+  // const {
+  //   attributes,
+  //   listeners,
+  //   setNodeRef,
+  //   transform,
+  //   transition
+  // } = useSortable({ id: props.id });
 
   return (
     <SortableContext

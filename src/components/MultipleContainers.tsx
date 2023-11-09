@@ -8,13 +8,22 @@ import {
   useSensors
 } from '@dnd-kit/core';
 
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
 import Container from './Container';
+
+// Drag over a new container
+// add to the end 
+
+// Drag over an item in a new continer and styles before over item.
+// Active an over are in the same column
+
+// Same column
+// Active swap with over
 
 // https://github.com/cssinjs/jss/issues/1344#issuecomment-734402215
 const wrapperStyle: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'row',
+  flexDirection: 'column',
 };
 
 export default function MultipleContainers() {
@@ -32,6 +41,7 @@ export default function MultipleContainers() {
     })
   );
 
+
   return (
     <div style={wrapperStyle}>
       <DndContext
@@ -48,92 +58,109 @@ export default function MultipleContainers() {
     </div>
   );
 
-  function findContainer(id) {
-    if (id in items) {
-      return id;
+
+
+  function findContainerId(idOfItemOrContainer) {
+    // if Id is a containerId 
+    if (idOfItemOrContainer in items) {
+      return idOfItemOrContainer; // return a container
     }
 
-    return Object.keys(items).find((key) => items[key].includes(id));
+    return Object.keys(items).find((key) => items[key].includes(idOfItemOrContainer));
   }
 
+  // For handle drag item to new container
   function handleDragOver(event) {
-    const { active, over, draggingRect } = event;
-    const { id } = active;
-    const { id: overId } = over;
+    const { active, over } = event;
+    const { id: activeId } = active; // item
+    const { id: overId } = over; // item in other container, or other container
 
     // Find the containers
-    const activeContainer = findContainer(id);
-    const overContainer = findContainer(overId);
+    const activeContainerId = findContainerId(activeId);
+    const overContainerId = findContainerId(overId);
 
-    if (
-      !activeContainer ||
-      !overContainer ||
-      activeContainer === overContainer
-    ) {
+    // drag item to a new container only
+    if (!activeContainerId || !overContainerId || activeContainerId === overContainerId) {
       return;
     }
 
-    setItems((prev) => {
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer];
+    // Over a new container
+    if (overId == overContainerId) {
 
-      // Find the indexes for the items
-      const activeIndex = activeItems.indexOf(id);
-      const overIndex = overItems.indexOf(overId);
+      console.log(`over containerId: ${overContainerId} only`);
+      setItems(prev => {
 
-      let newIndex;
-      if (overId in prev) {
-        // We're at the root droppable of a container
-        newIndex = overItems.length + 1;
-      } else {
-        const isBelowLastItem =
-          over &&
-          overIndex === overItems.length - 1 &&
-          draggingRect?.offsetTop > over?.rect?.offsetTop + over?.rect?.height;
+        const activeItems = prev[activeContainerId];
+        const overItems = prev[overContainerId];
 
-        const modifier = isBelowLastItem ? 1 : 0;
+        //   Find the indexes for the items
+        //const activeIndex = activeItems.indexOf(activeId);
+        const activeItem = activeItems.find((item) => item == activeId);
 
-        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
-      }
+        return {
+          ...prev,
+          [activeContainerId]: activeItems.filter((item) => item !== activeItem),//remove  [ ] to read a value of a key
+          [overContainerId]: [...overItems, activeItem] // add to the end of an over container
+        };
+      })
 
-      return {
-        ...prev,
-        [activeContainer]: [
-          ...prev[activeContainer].filter((item) => item !== active.id)
-        ],
-        [overContainer]: [
-          ...prev[overContainer].slice(0, newIndex),
-          items[activeContainer][activeIndex],
-          ...prev[overContainer].slice(newIndex, prev[overContainer].length)
-        ]
-      };
-    });
+    } else {
+
+      // over an item in a new container
+      console.log(`${activeId} is over itemId: ${overId}`);
+      setItems(prev => {
+
+        const activeItems = prev[activeContainerId];
+        const overItems = prev[overContainerId];
+
+        //   Find the indexes for the items
+        const overIndex = overItems.indexOf(overId);
+        const activeItem = activeItems.find((item) => item == activeId);
+
+        console.log(`${activeId} and ${overId} are in the same column`);
+        return {
+          ...prev,
+          [activeContainerId]: activeItems.filter((item) => item !== activeItem),//remove  [ ] to read a value of a key
+          [overContainerId]: [
+            ...overItems.slice(0, overIndex),
+            activeItem,
+            ...overItems.slice(overIndex),
+          ] // add to the end of an over container
+        };
+      })
+    }
   }
 
   function handleDragEnd(event) {
     const { active: { id: activeId }, over: { id: overId } } = event;
 
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
+    const activeContainerId = findContainerId(activeId);
+    const overContainerId = findContainerId(overId);
 
     // If not the same container, return;
-    if (!activeContainer || !overContainer || activeContainer !== overContainer
-    ) {
+    if (!activeContainerId || !overContainerId || activeContainerId !== overContainerId) {
       return;
     }
 
     // active activeContainer and overContainer are the same
-    console.log(activeContainer)
-    console.log(overContainer)
+    const activeIndex = items[activeContainerId].indexOf(activeId);
+    const overIndex = items[activeContainerId].indexOf(overId);
 
-    const activeIndex = items[overContainer].indexOf(activeId);
-    const overIndex = items[overContainer].indexOf(overId);
-
-    if (activeIndex !== overIndex) {
-      setItems((items) => ({
-        ...items,
-        [overContainer]: arrayMove(items[overContainer], activeIndex, overIndex)
-      }));
+    if (activeIndex == overIndex) {
+      return;
     }
+
+    console.log(`Same column activeId: ${activeId}, index: ${activeIndex} and overId: ${overId} index: ${overIndex}`);
+
+    setItems((prev) => {
+
+      return {
+        ...prev,
+        [activeContainerId]: arrayMove(items[activeContainerId], activeIndex, overIndex)
+      };
+
+    })
+
   }
+
 }
