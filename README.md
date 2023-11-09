@@ -19,5 +19,8 @@ $ dotnet run
 - Open a browser and navigate to http://localhost:5000/
 
 
+## DND Kit
+- [ ] Remove DragOverlay to simplify the code.
+
 # Reference
 - [ReactJS.NET - Tutorial (ASP.NET Core) ](https://reactjs.net/tutorials/aspnetcore.html)

@@ -27,7 +27,7 @@ export default function Container(props) {
       items={items}
       strategy={verticalListSortingStrategy}
     >
-      <div ref={setNodeRef} style={containerStyle}>
+      <div data-id={id} ref={setNodeRef} style={containerStyle}>
         {items.map((id) => (
           <SortableItem key={id} id={id} />
         ))}
