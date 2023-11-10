@@ -30,6 +30,7 @@ export default function SortableItem({ value }) {
     id: value,
     data: {
       type: "Item", // https://docs.dndkit.com/api-documentation/draggable/usedraggable#data
+      value: value
     },
   });
 

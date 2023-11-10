@@ -25,7 +25,7 @@ export default function SortableContainer(props) {
     id,
     data: {
       type: "Container", // https://docs.dndkit.com/api-documentation/draggable/usedraggable#data
-      container
+      value: container
     },
   });
 

@@ -12,6 +12,7 @@ import {
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import SortableContainer from './SortableContainer';
 import { Container, Item } from './Type';
+import SortableItem from './SortableItem';
 
 // Drag over a new container
 // add to the end 
@@ -47,7 +48,7 @@ export default function MultipleContainers() {
 
   //  const [activeId, setActiveId] = useState();
   const [activeContainer, setActiveContainer] = useState<Container | null>(null);
-  const [activeItem, setActiveTask] = useState<Item | null>(null);
+  const [activeItem, setActiveItem] = useState<Item | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -72,9 +73,17 @@ export default function MultipleContainers() {
               <SortableContainer key={container.id} id={container.id} container={container} />
             )}
         </SortableContext>
-        <DragOverlay>{
-          activeContainer ?
-            <SortableContainer id={activeContainer.id} container={activeContainer} /> : null}
+        <DragOverlay
+          style={{
+            opacity: '70%',
+          }}
+        >
+          {
+            activeContainer ? <SortableContainer id={activeContainer.id} container={activeContainer} /> : null
+          }
+          {
+            activeItem ? <SortableItem value={activeItem} /> : null
+          }
         </DragOverlay>
       </DndContext>
     </div>
@@ -82,14 +91,13 @@ export default function MultipleContainers() {
 
 
   function handleDragStart(event) {
-
     if (event.active.data.current?.type === "Container") {
-      setActiveContainer(event.active.data.current.container);
+      setActiveContainer(event.active.data.current.value);
       return;
     }
 
-    if (event.active.data.current?.type === "Task") {
-      setActiveTask(event.active.data.current.task);
+    if (event.active.data.current?.type === "Item") {
+      setActiveItem(event.active.data.current.value);
       return;
     }
 
@@ -104,7 +112,7 @@ export default function MultipleContainers() {
 
 
     container = containers.find(col => col.items.some(i => i == idOfItemOrContainer))
-    return container;
+    return container.id;
   }
 
   // // For handle drag item to new container
@@ -170,50 +178,56 @@ export default function MultipleContainers() {
   // }
 
   function handleDragEnd(event) {
+
+    setActiveContainer(null);
+    setActiveItem(null);
     const { active, over } = event;
 
-    const isActiveAContainer = active.data.current?.type === "Container";
+    const isActiveContainer = active.data.current?.type === "Container";
+    const isOverContainer = over.data.current?.type === "Container";
 
-    if (!isActiveAContainer) {
+    if (isActiveContainer && isOverContainer) {
+
+      const activeContainerIndex = containers.findIndex((col) => col.id === active.id);
+      const overContainerIndex = containers.findIndex((col) => col.id === over.id);
+
+      setContainers((prev) => {
+        return arrayMove(prev, activeContainerIndex, overContainerIndex);
+      });
+
       return;
     }
 
-    const activeContainerIndex = containers.findIndex((col) => col.id === active.id);
-    const overContainerIndex = containers.findIndex((col) => col.id === over.id);
+
+    const isActiveItem = active.data.current?.type === "Item";
+    const isOverItem = over.data.current?.type === "Item";
+    const activeContainerId = findContainerId(active.id);
+    const overContainerId = findContainerId(over.id);
+
+    const isSameContainer = activeContainerId === overContainerId;
 
 
-    setContainers((prev) => {
-      return arrayMove(prev, activeContainerIndex, overContainerIndex);
-    });
+    if (isActiveItem && isOverItem && isSameContainer) {
+      console.log('same container');
 
+      setContainers((prev) => {
+
+        var containerIndex = prev.findIndex(c => c.id == activeContainerId);
+        var container = prev[containerIndex];
+
+        var activeIndex = container.items.findIndex(i => i == active.id);
+        var overIndex = container.items.findIndex(i => i == over.id);
+        container.items = arrayMove(container.items, activeIndex, overIndex);
+
+        return [
+          ...prev.slice(0, containerIndex),
+          container,
+          ...prev.slice(containerIndex + 1)
+        ];
+
+      });
+    }
 
   }
-
-  // const activeContainerId = findContainerId(active.id);
-  // const overContainerId = findContainerId(over.id);
-
-  // // If not the same container, return;
-  // if (!activeContainerId || !overContainerId || activeContainerId !== overContainerId) {
-  //   return;
-  // }
-
-  // // active activeContainer and overContainer are the same
-  // const activeIndex = items[activeContainerId].indexOf(activeId);
-  // const overIndex = items[activeContainerId].indexOf(overId);
-
-  // if (activeIndex == overIndex) {
-  //   return;
-  // }
-
-  // console.log(`Same Container activeId: ${activeId}, index: ${activeIndex} and overId: ${overId} index: ${overIndex}`);
-
-  // setItems((prev) => {
-
-  //   return {
-  //     ...prev,
-  //     [activeContainerId]: arrayMove(items[activeContainerId], activeIndex, overIndex)
-  //   };
-
-
 
 }
