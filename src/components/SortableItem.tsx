@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 export function Item(props) {
-  const { id } = props;
+  const { value } = props;
 
   const style = {
     width: "100%",
@@ -16,17 +16,24 @@ export function Item(props) {
     background: "white"
   };
 
-  return <div style={style}>{id}</div>;
+  return <div style={style}>{value}</div>;
 }
 
-export default function SortableItem(props) {
+export default function SortableItem({ value }) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
     transition
-  } = useSortable({ id: props.id });
+  } = useSortable({
+    id: value,
+    data: {
+      type: "Item", // https://docs.dndkit.com/api-documentation/draggable/usedraggable#data
+    },
+  });
+
+  // const isOverAContainer = over.data.current?.type === "Container";
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -35,7 +42,7 @@ export default function SortableItem(props) {
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Item id={props.id} />
+      <Item value={value} />
     </div>
   );
 }
