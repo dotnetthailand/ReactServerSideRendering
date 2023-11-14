@@ -34,7 +34,9 @@ export default function SortableContainer(props) {
     padding: 10,
     margin: 10,
     transform: CSS.Transform.toString(transform),
-    transition
+    transition,
+    border: '1px solid #F00',
+    minHeight: '300px'
   };
 
   return (

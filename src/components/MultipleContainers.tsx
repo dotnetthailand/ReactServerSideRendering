@@ -35,11 +35,11 @@ const wrapperStyle: React.CSSProperties = {
 var defaultContainers: Container[] = [
   {
     id: 'root',
-    items: ["1", "2", "3"]
+    items: ["1", "2", "3", "4"]
   },
   {
     id: 'container1',
-    items: ["4", "5", "6"]
+    items: ["5", "6"]
   }
 ];
 
@@ -57,14 +57,13 @@ export default function MultipleContainers() {
     })
   );
 
-
   return (
     <div style={wrapperStyle}>
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
         onDragStart={handleDragStart}
-        //onDragOver={handleDragOver}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
         <SortableContext items={containers} strategy={verticalListSortingStrategy}>
@@ -89,7 +88,6 @@ export default function MultipleContainers() {
     </div>
   );
 
-
   function handleDragStart(event) {
     if (event.active.data.current?.type === "Container") {
       setActiveContainer(event.active.data.current.value);
@@ -100,7 +98,6 @@ export default function MultipleContainers() {
       setActiveItem(event.active.data.current.value);
       return;
     }
-
   }
 
   function findContainerId(idOfItemOrContainer) {
@@ -110,105 +107,97 @@ export default function MultipleContainers() {
       return container.id;
     }
 
-
     container = containers.find(col => col.items.some(i => i == idOfItemOrContainer))
     return container.id;
   }
 
-  // // For handle drag item to new container
-  // function handleDragOver(event) {
-  //   const { active, over } = event;
-  //   const { id: activeId } = active; // item
-  //   const { id: overId } = over; // item in other container, or other container
-
-  //   // Find the containers
-  //   const activeContainerId = findContainerId(activeId);
-  //   const overContainerId = findContainerId(overId);
-
-  //   // drag item to a new container only
-  //   if (!activeContainerId || !overContainerId || activeContainerId === overContainerId) {
-  //     return;
-  //   }
-
-  //   // Over a new container
-  //   if (overId == overContainerId) {
-
-  //     console.log(`over containerId: ${overContainerId} only`);
-  //     setItems(prev => {
-
-  //       const activeItems = prev[activeContainerId];
-  //       const overItems = prev[overContainerId];
-
-  //       //   Find the indexes for the items
-  //       //const activeIndex = activeItems.indexOf(activeId);
-  //       const activeItem = activeItems.find((item) => item == activeId);
-
-  //       return {
-  //         ...prev,
-  //         [activeContainerId]: activeItems.filter((item) => item !== activeItem),//remove  [ ] to read a value of a key
-  //         [overContainerId]: [...overItems, activeItem] // add to the end of an over container
-  //       };
-  //     })
-
-  //   } else {
-
-  //     // over an item in a new container
-  //     console.log(`${activeId} is over itemId: ${overId}`);
-  //     setItems(prev => {
-
-  //       const activeItems = prev[activeContainerId];
-  //       const overItems = prev[overContainerId];
-
-  //       //   Find the indexes for the items
-  //       const overIndex = overItems.indexOf(overId);
-  //       const activeItem = activeItems.find((item) => item == activeId);
-
-  //       console.log(`${activeId} and ${overId} are in the same Container`);
-  //       return {
-  //         ...prev,
-  //         [activeContainerId]: activeItems.filter((item) => item !== activeItem),//remove  [ ] to read a value of a key
-  //         [overContainerId]: [
-  //           ...overItems.slice(0, overIndex),
-  //           activeItem,
-  //           ...overItems.slice(overIndex),
-  //         ] // add to the end of an over container
-  //       };
-  //     })
-  //   }
-  // }
-
-  function handleDragEnd(event) {
-
-    setActiveContainer(null);
-    setActiveItem(null);
+  // For handle drag item over new container:
+  // An item over a container
+  // An item over an item
+  function handleDragOver(event) {
     const { active, over } = event;
 
+    const isActiveItem = active.data.current?.type === "Item";
+    const isOverItemOrContainer = ["Item", "Container"].includes(over.data.current?.type);
+    if (!isActiveItem || !isOverItemOrContainer) {
+      return;
+    }
+
+    // Find the containers
+    const activeContainerId = findContainerId(active.id);
+    const overContainerId = findContainerId(over.id);
+
+    // Drag item over a new container only
+    if (activeContainerId === overContainerId) {
+      return;
+    }
+
+    console.log(`${over.id} - ${overContainerId}`);
+    setContainers(prev => {
+      var activeContainerIndex = prev.findIndex(c => c.id === activeContainerId);
+      var overContainerIndex = prev.findIndex(c => c.id === overContainerId);
+
+      const activeContainer = prev[activeContainerIndex];
+      const overContainer = prev[overContainerIndex];
+
+      var activeItemIndex = activeContainer.items.findIndex(i => i === active.id);
+      console.log(`activeItemIndex ${activeItemIndex}, activeContainerIndex: ${activeContainerIndex}, overContainerIndex: ${overContainerIndex}`)
+
+      // move item in the current container
+      const activeItem = activeContainer.items[activeItemIndex];
+      activeContainer.items = activeContainer.items.filter(i => i !== active.id);
+      overContainer.items = [...overContainer.items, activeItem]; // Add to the end of an over container
+
+      if (activeContainerIndex < overContainerIndex) {
+        console.log('update');
+        return [
+          ...prev.slice(0, activeContainerIndex),
+          activeContainer, // Set the current container with new items.  1
+          ...prev.slice(activeContainerIndex + 1, overContainerIndex),
+          overContainer,
+          ...prev.slice(overContainerIndex + 1),
+        ];
+      } else {
+        return [
+          ...prev.slice(0, overContainerIndex),
+          overContainer, // Set the current container with new items.  1
+          ...prev.slice(overContainerIndex + 1, activeContainerIndex),
+          activeContainer,
+          ...prev.slice(activeContainerIndex + 1),
+        ];
+      }
+    });
+  }
+
+  // Only container over container and
+  // items in the same container
+  function handleDragEnd(event) {
+    setActiveContainer(null);
+    setActiveItem(null);
+
+    const { active, over } = event;
     const isActiveContainer = active.data.current?.type === "Container";
     const isOverContainer = over.data.current?.type === "Container";
 
     if (isActiveContainer && isOverContainer) {
 
-      const activeContainerIndex = containers.findIndex((col) => col.id === active.id);
-      const overContainerIndex = containers.findIndex((col) => col.id === over.id);
-
       setContainers((prev) => {
+        const activeContainerIndex = containers.findIndex((col) => col.id === active.id);
+        const overContainerIndex = containers.findIndex((col) => col.id === over.id);
         return arrayMove(prev, activeContainerIndex, overContainerIndex);
       });
 
       return;
     }
 
-
     const isActiveItem = active.data.current?.type === "Item";
     const isOverItem = over.data.current?.type === "Item";
+
     const activeContainerId = findContainerId(active.id);
     const overContainerId = findContainerId(over.id);
-
     const isSameContainer = activeContainerId === overContainerId;
 
-
     if (isActiveItem && isOverItem && isSameContainer) {
-      console.log('same container');
 
       setContainers((prev) => {
 
@@ -217,17 +206,15 @@ export default function MultipleContainers() {
 
         var activeIndex = container.items.findIndex(i => i == active.id);
         var overIndex = container.items.findIndex(i => i == over.id);
+        // move item in the current container
         container.items = arrayMove(container.items, activeIndex, overIndex);
 
         return [
-          ...prev.slice(0, containerIndex),
-          container,
-          ...prev.slice(containerIndex + 1)
+          ...prev.slice(0, containerIndex), // Get containers before the current container index.
+          container, // Set the current container with new items.
+          ...prev.slice(containerIndex + 1), // Get containers after the current container index.
         ];
-
       });
     }
-
   }
-
 }
