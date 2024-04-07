@@ -47,7 +47,6 @@ export default function DateInput({ defaultValue, name, className = '' }: Props)
     return utc.tz(defaultTimezone).format();
   });
 
-
   const onChange = (date: string) => {
     if (!date) {
       setUtcDate('');
@@ -55,7 +54,7 @@ export default function DateInput({ defaultValue, name, className = '' }: Props)
     }
     // convert local date to UTC date
     // https://day.js.org/docs/en/plugin/utc
-    const localDate = dayjs.tz(date, defaultTimezone); // ''
+    const localDate = dayjs.tz(date as string, defaultTimezone); // ''
     setUtcDate(_ => {
       const newUtcDate = localDate.utc().format();
       return newUtcDate;
@@ -71,5 +70,4 @@ export default function DateInput({ defaultValue, name, className = '' }: Props)
       <input name={name} type='hidden' value={utcDate} />
     </>
   );
-
 }
