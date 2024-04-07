@@ -6,17 +6,19 @@
 
 <head>
   <title>Hello React</title>
+  <link rel="stylesheet" href="~/styles/react-ssr.css" asp-append-version="true" />
 
-  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
   <script src="~/scripts/react.development.js"></script>
   <script src="~/scripts/react-dom.development.js"></script>
   <script src="~/scripts/react-ssr.js" asp-append-version="true"></script>
 </head>
 
 <body>
+  @Html.React("ReactSsr.DateInput", new { })
   @Html.React("ReactSsr.Hello", new { name })
 
-  @Html.React("ReactSsr.MultipleContainers", new { })
+  @* @Html.React("ReactSsr.MultipleContainers", new { }) *@
+  @* @Html.React("ReactSsr.MinimalSortableTree", new { }, clientOnly:false) *@
   @Html.ReactInitJavaScript()
 </body>
 
