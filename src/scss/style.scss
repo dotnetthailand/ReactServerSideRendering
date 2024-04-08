@@ -1,1 +1,13 @@
 // @import "~antd/dist/antd.css";
+
+body {
+  padding: 0 50px;
+}
+
+.main-containter {}
+
+@import "react-datepicker/dist/react-datepicker.css";
+
+.react-datepicker__time-list-item.react-datepicker__time-list-item--disabled {
+  display: none;
+}

@@ -6,6 +6,8 @@
 
 <head>
   <title>Hello React</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="~/styles/react-ssr.css" asp-append-version="true" />
 
   <script src="~/scripts/react.development.js"></script>
@@ -14,9 +16,7 @@
 </head>
 
 <body>
-  @Html.React("ReactSsr.DateInput", new { })
-  @Html.React("ReactSsr.Hello", new { name })
-
+  @Html.React("ReactSsr.DateTimePicker", new { })
   @* @Html.React("ReactSsr.MultipleContainers", new { }) *@
   @* @Html.React("ReactSsr.MinimalSortableTree", new { }, clientOnly:false) *@
   @Html.ReactInitJavaScript()

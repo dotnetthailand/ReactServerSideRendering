@@ -28,9 +28,11 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "antd": "^5.16.1",
+    "date-fns": "^3.6.0",
     "dayjs": "^1.11.10",
     "dnd-kit-sortable-tree": "^0.1.73",
     "react": "^17.0.2",
+    "react-datepicker": "^6.6.0",
     "react-dom": "^17.0.2",
     "styled-components": "^6.1.0"
   }
